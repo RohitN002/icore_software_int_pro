@@ -1,8 +1,10 @@
 import User from "../models/user.js";
-import bcryt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import dotenv from "dotenv";
+dotenv.config();
 const JWT_SECRET = process.env.JWT;
+
 export const registerUser = async (req, res) => {
   const {
     firstName,
@@ -15,12 +17,26 @@ export const registerUser = async (req, res) => {
     state,
     email,
     password,
-  } = req.body();
+  } = req.body;
+  console.log(
+    firstName,
+    lastName,
+    role,
+    dob,
+    gender,
+    mobile,
+    city,
+    state,
+    email,
+    password
+  );
   try {
-    const userExist = await UserActivation.findOne({ email });
+    const userExist = await User.findOne({ email });
     if (userExist)
-      return res.status(400).json({ message: "User already registerd" });
-    const hassedPassword = await bcryt.hash(password, 10);
+      return res.status(400).json({ message: "User already registered" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
       firstName,
       lastName,
@@ -31,10 +47,11 @@ export const registerUser = async (req, res) => {
       city,
       state,
       email,
-      password: hassedPassword,
+      password: hashedPassword,
     });
+
     await newUser.save();
-    res.status(201).json({ message: "User Registred Sucessfully" });
+    res.status(201).json({ message: "User Registered Successfully" });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({ error: error.message });
@@ -42,20 +59,21 @@ export const registerUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body();
+  const { email, password } = req.body;
+  console.log(email, password);
   try {
     const user = await User.find({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    const isMatch = await bcryt.compare(password, user.password);
+    console.log("user", user, "password", user[0].password);
+    const isMatch = await bcrypt.compare(password, user[0].password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid Credintials" });
     }
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "24h" });
     res.status(200).json({ token, user });
-  } catch (error) {
-    return res.status(500).json({ message: "Internal server Error" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
