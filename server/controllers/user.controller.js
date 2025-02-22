@@ -32,10 +32,11 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser)
+    if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
+    }
 
-    res.status(204).json({ message: "User deleted successfully" });
+    return res.status(204).json({ message: "User deleted successfully" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -45,8 +46,8 @@ export const exportUsers = async (req, res) => {
     const users = await User.find();
     const worksheet = await xlsx.utils.json_to_sheet(
       users.map((user) => ({
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         dob: user.dob,
         gender: user.gender,

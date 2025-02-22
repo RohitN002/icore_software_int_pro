@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
-const JWT_SECRET = process.env.JWT;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const registerUser = async (req, res) => {
   const {
@@ -71,8 +71,20 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid Credintials" });
     }
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "24h" });
-    res.status(200).json({ token, user });
+    const token = jwt.sign({ id: user._id }, "hello", { expiresIn: "24h" });
+    res.status(200).json({ token });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+    return res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

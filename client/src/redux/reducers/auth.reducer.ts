@@ -27,7 +27,21 @@ export const signupUser = createAsyncThunk(
     }
   }
 );
-
+export const logOut = createAsyncThunk(
+  "auth/logOut",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/logout"
+      );
+      toast.success("Logout successful!");
+      return response.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Logout failed");
+      return rejectWithValue(error.response?.data?.message || "Logout failed");
+    }
+  }
+);
 // Login
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -91,6 +105,14 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(logOut.fulfilled, (state) => {
+        state.user = null;
+        // state.isAuthenticated = false;
+        toast.info("You have been logged out.");
+      })
+      .addCase(logOut.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

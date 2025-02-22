@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { signupUser } from "../redux/reducers/auth.reducer";
-import { useNavigate } from "react-router-dom";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
     firstName: "",
